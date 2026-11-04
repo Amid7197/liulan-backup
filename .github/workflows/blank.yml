@@ -1,0 +1,82 @@
+name: Sync domain from ssb.txt
+
+on:
+  schedule:
+    - cron: '12 10 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch ssb.txt first line & update line 18 / line 4
+        run: |
+          python3 - <<'EOF'
+          import urllib.request, re, time
+
+          RAW  = "https://raw.githubusercontent.com/Amid7197/js/refs/heads/main/crx/ssb.txt"
+          PATH = "cookie-sync/cookie-auto-delete.json"
+
+          # 1) 取 ssb.txt 第一行
+          html = urllib.request.urlopen(RAW, timeout=30).read().decode("utf-8")
+          new_domain = html.splitlines()[0].strip()
+          print("ssb.txt 第一行:", new_domain)
+
+          with open(PATH, encoding="utf-8") as f:
+              lines = f.readlines()
+
+          if len(lines) < 18:
+              raise SystemExit("文件不足 18 行")
+
+          # 2) 第 18 行（索引 17）
+          line = lines[17]
+          m = re.search(r'"([^"]*)"', line)
+          if not m:
+              raise SystemExit(f"第18行没找到引号内容: {line!r}")
+
+          old_domain = m.group(1)
+          print("第18行当前值:", old_domain)
+
+          if old_domain == new_domain:
+              print("内容一致，无需修改")
+              raise SystemExit(0)
+
+          # 3) 替换第 18 行
+          lines[17] = line.replace(old_domain, new_domain)
+          print(f"已替换第18行: {old_domain} -> {new_domain}")
+
+          # 4) 把第 4 行（索引 3）updatedAt 改成当前毫秒时间戳
+          now_ms = int(time.time() * 1000)
+          before = lines[3]
+          lines[3] = re.sub(
+              r'("updatedAt"\s*:\s*)\d+',
+              lambda mm: mm.group(1) + str(now_ms),
+              lines[3],
+          )
+          if lines[3] == before:
+              raise SystemExit(f"第4行 updatedAt 未匹配到数字: {before!r}")
+          print(f"已更新第4行 updatedAt: {now_ms}")
+
+          with open(PATH, "w", encoding="utf-8") as f:
+              f.writelines(lines)
+          EOF
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- cookie-sync/cookie-auto-delete.json; then
+            echo "没有变更，跳过提交"
+            exit 0
+          fi
+
+          git add cookie-sync/cookie-auto-delete.json
+          git commit -m "chore: sync domain from ssb.txt"
+          git push
