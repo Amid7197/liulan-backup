@@ -15,56 +15,65 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Fetch ssb.txt first line & update line 18 / line 4
+      - name: Sync ssb.txt -> .ssb.bak & cookie-auto-delete.json
         run: |
           python3 - <<'EOF'
-          import urllib.request, re, time
+          import urllib.request, re, time, os
 
-          RAW  = "https://raw.githubusercontent.com/Amid7197/js/refs/heads/main/crx/ssb.txt"
-          PATH = "cookie-sync/cookie-auto-delete.json"
+          RAW  = "https://raw.githubusercontent.com/dar/jb/main/crx/ssb.txt"
+          BAK  = "cookie-sync/.ssb.bak"
+          JSON = "cookie-sync/cookie-auto-delete.json"
 
-          # 1) 取 ssb.txt 第一行
-          html = urllib.request.urlopen(RAW, timeout=30).read().decode("utf-8")
-          new_domain = html.splitlines()[0].strip()
-          print("ssb.txt 第一行:", new_domain)
+          # 1) 拉取远端 ssb.txt，统一换行符
+          remote = urllib.request.urlopen(RAW, timeout=30).read().decode("utf-8")
+          remote = remote.replace("\r\n", "\n")
+          remote_first = remote.splitlines()[0].strip() if remote.strip() else ""
+          print("远端第一行:", remote_first)
 
-          with open(PATH, encoding="utf-8") as f:
-              lines = f.readlines()
+          # 2) 读取本地 .ssb.bak
+          if os.path.exists(BAK):
+              with open(BAK, encoding="utf-8") as f:
+                  local = f.read().replace("\r\n", "\n")
+          else:
+              local = None
+              print("本地 .ssb.bak 不存在（首次运行）")
 
-          if len(lines) < 18:
-              raise SystemExit("文件不足 18 行")
-
-          # 2) 第 18 行（索引 17）
-          line = lines[17]
-          m = re.search(r'"([^"]*)"', line)
-          if not m:
-              raise SystemExit(f"第18行没找到引号内容: {line!r}")
-
-          old_domain = m.group(1)
-          print("第18行当前值:", old_domain)
-
-          if old_domain == new_domain:
-              print("内容一致，无需修改")
+          if local is not None and local == remote:
+              print("ssb.txt 与 .ssb.bak 一致，无需修改")
               raise SystemExit(0)
 
-          # 3) 替换第 18 行
-          lines[17] = line.replace(old_domain, new_domain)
-          print(f"已替换第18行: {old_domain} -> {new_domain}")
+          # 3) 不一致：用 .ssb.bak 第一行去 JSON 搜索替换
+          if local is None:
+              print("首次运行：只写入 .ssb.bak，JSON 不自动改（没有旧值可搜索）")
+          else:
+              local_first = local.splitlines()[0].strip() if local.strip() else ""
+              print(f"旧第一行: {local_first!r} -> 新第一行: {remote_first!r}")
 
-          # 4) 把第 4 行（索引 3）updatedAt 改成当前毫秒时间戳
-          now_ms = int(time.time() * 1000)
-          before = lines[3]
-          lines[3] = re.sub(
-              r'("updatedAt"\s*:\s*)\d+',
-              lambda mm: mm.group(1) + str(now_ms),
-              lines[3],
-          )
-          if lines[3] == before:
-              raise SystemExit(f"第4行 updatedAt 未匹配到数字: {before!r}")
-          print(f"已更新第4行 updatedAt: {now_ms}")
+              if local_first and local_first != remote_first:
+                  with open(JSON, encoding="utf-8") as f:
+                      content = f.read()
 
-          with open(PATH, "w", encoding="utf-8") as f:
-              f.writelines(lines)
+                  if local_first in content:
+                      content = content.replace(local_first, remote_first)
+                      # 4) 同步更新第 4 行 updatedAt 为当前毫秒时间戳
+                      now_ms = int(time.time() * 1000)
+                      content = re.sub(
+                          r'("updatedAt"\s*:\s*)\d+',
+                          lambda m: m.group(1) + str(now_ms),
+                          content,
+                      )
+                      with open(JSON, "w", encoding="utf-8") as f:
+                          f.write(content)
+                      print(f"已在 JSON 中替换域名，updatedAt -> {now_ms}")
+                  else:
+                      print("警告：JSON 中未找到旧第一行，JSON 未修改")
+              elif local_first == remote_first:
+                  print("第一行相同，仅更新 .ssb.bak，不改 JSON")
+
+          # 5) 更新 .ssb.bak 为远端全文
+          with open(BAK, "w", encoding="utf-8") as f:
+              f.write(remote)
+          print("已写入 .ssb.bak")
           EOF
 
       - name: Commit & push if changed
@@ -72,11 +81,13 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          if git diff --quiet -- cookie-sync/cookie-auto-delete.json; then
+          # 先 add（含新文件 .ssb.bak），再用 --cached 判断是否有变更
+          git add cookie-sync/cookie-auto-delete.json cookie-sync/.ssb.bak
+
+          if git diff --cached --quiet; then
             echo "没有变更，跳过提交"
             exit 0
           fi
 
-          git add cookie-sync/cookie-auto-delete.json
           git commit -m "chore: sync domain from ssb.txt"
           git push
