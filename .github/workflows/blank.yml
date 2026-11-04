@@ -20,7 +20,7 @@ jobs:
           python3 - <<'EOF'
           import urllib.request, re, time, os
 
-          RAW  = "https://raw.githubusercontent.com/dar/jb/main/crx/ssb.txt"
+          RAW  = "https://raw.githubusercontent.com/Amid7197/js/refs/heads/main/crx/ssb.txt"
           BAK  = "cookie-sync/.ssb.bak"
           JSON = "cookie-sync/cookie-auto-delete.json"
 
