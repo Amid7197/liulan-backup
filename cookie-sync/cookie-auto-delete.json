@@ -1,0 +1,9 @@
+{
+  "app": "cookie-auto-delete",
+  "format": 1,
+  "updatedAt": 1793847703683,
+  "whitelist": [
+    "club.ugnas.com"
+  ],
+  "blacklist": []
+}
