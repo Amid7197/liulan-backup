@@ -1,7 +1,7 @@
 {
   "app": "cookie-auto-delete",
   "format": 1,
-  "updatedAt": 1793847932991,
+  "updatedAt": 1793848224068,
   "whitelist": [
     "google.com",
     "baidu.com",
@@ -63,5 +63,15 @@
     "club.ugnas.com",
     "hub.atk.pro"
   ],
-  "blacklist": []
+  "blacklist": [],
+  "settings": {
+    "state": "ON",
+    "sweep": false,
+    "notify": true,
+    "listmode": "whitelist",
+    "patterns": false,
+    "subdomains": true,
+    "sessiononly": true,
+    "whitelistmode": "list"
+  }
 }
