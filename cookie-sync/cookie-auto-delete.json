@@ -1,7 +1,7 @@
 {
   "app": "cookie-auto-delete",
   "format": 1,
-  "updatedAt": 1793901529729,
+  "updatedAt": 1793962360078,
   "whitelist": [
     "google.com",
     "baidu.com",
@@ -50,7 +50,6 @@
     "touchgal.ink",
     "localhost",
     "ithome.com",
-    "hub.docker.com",
     "x.ai",
     "grok.com",
     "hlib.cc",
