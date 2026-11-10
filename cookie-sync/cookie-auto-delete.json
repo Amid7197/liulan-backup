@@ -1,7 +1,7 @@
 {
   "app": "cookie-auto-delete",
   "format": 1,
-  "updatedAt": 1794222565453,
+  "updatedAt": 1794298217521,
   "whitelist": [
     "google.com",
     "baidu.com",
@@ -56,7 +56,6 @@
     "centbrowser.net",
     "workbuddy.cn",
     "192.168.5.2",
-    "deepseek.com",
     "biteb.ninja",
     "right.com.cn",
     "club.ugnas.com",
