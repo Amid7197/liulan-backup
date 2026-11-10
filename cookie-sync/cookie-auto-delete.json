@@ -1,7 +1,7 @@
 {
   "app": "cookie-auto-delete",
   "format": 1,
-  "updatedAt": 1794301431327,
+  "updatedAt": 1794301438201,
   "whitelist": [
     "google.com",
     "baidu.com",
@@ -59,7 +59,8 @@
     "right.com.cn",
     "club.ugnas.com",
     "hub.atk.pro",
-    "bbs.kfpromax.com"
+    "bbs.kfpromax.com",
+    "chat.deepseek.com"
   ],
   "blacklist": [],
   "settings": {
