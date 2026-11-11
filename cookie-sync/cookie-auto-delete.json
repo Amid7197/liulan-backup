@@ -1,7 +1,7 @@
 {
   "app": "cookie-auto-delete",
   "format": 1,
-  "updatedAt": 1794406243718,
+  "updatedAt": 1794406251926,
   "whitelist": [
     "google.com",
     "baidu.com",
@@ -61,7 +61,8 @@
     "hub.atk.pro",
     "bbs.kfpromax.com",
     "anthropic.com",
-    "claude.ai"
+    "claude.ai",
+    "platform.deepseek.com"
   ],
   "blacklist": [],
   "settings": {
