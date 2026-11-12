@@ -1,7 +1,7 @@
 {
   "app": "cookie-auto-delete",
   "format": 1,
-  "updatedAt": 1794492394926,
+  "updatedAt": 1794492408120,
   "whitelist": [
     "google.com",
     "baidu.com",
@@ -63,8 +63,7 @@
     "anthropic.com",
     "claude.ai",
     "platform.deepseek.com",
-    "chat.deepseek.com",
-    "kimi.com"
+    "chat.deepseek.com"
   ],
   "blacklist": [],
   "settings": {
