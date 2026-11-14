@@ -1,7 +1,7 @@
 {
   "app": "cookie-auto-delete",
   "format": 1,
-  "updatedAt": 1794492525490,
+  "updatedAt": 1794638518461,
   "whitelist": [
     "google.com",
     "baidu.com",
@@ -60,8 +60,6 @@
     "club.ugnas.com",
     "hub.atk.pro",
     "bbs.kfpromax.com",
-    "anthropic.com",
-    "claude.ai",
     "platform.deepseek.com",
     "chat.deepseek.com",
     "kimi.com"
